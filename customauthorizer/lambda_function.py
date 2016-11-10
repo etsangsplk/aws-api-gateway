@@ -14,7 +14,8 @@ import logging
 import jwt
 
 # Set the token secret from the admin portal as a constant
-SECRET = "secret"
+# Set apitest token secrtet for testing purposes
+TEST_SECRET={"approov":"secret","apitest":None}
 
 # Logging passed authorisations
 logger = logging.getLogger()
@@ -38,16 +39,32 @@ def lambda_handler(event, context):
 
     # Decode the token using the per-customer secret downloaded from the
     # Approov admin portal
+    tryapi_token = False
     try:
-        tokenContents = jwt.decode(token, SECRET, algorithms=['HS256'])
+        tokenContents = jwt.decode(token, TEST_SECRET["approov"], algorithms=['HS256'])
     except jwt.ExpiredSignatureError:
         # Signature has expired, token is bad
         logger.error("Authorization FAILED")
         raise Exception('Unauthorized')
     except:
-        # Token could not be decoded, token is bad
-        logger.error("Authorization FAILED")
-        raise Exception('Unauthorized')
+        #if first token is failed and there is no apitest token then rise exception
+        if TEST_SECRET["apitest"] == None:
+            logger.error("Authorization FAILED")
+            raise Exception('Unauthorized')
+        # token approve is not valid set tryapi_test to decode apitest token
+        else:
+            tryapi_token = True
+
+    if tryapi_token:
+        #if first token failed lets try to use apitest token if api is in test mode
+        try:
+            tokenContents = jwt.decode(token, TEST_SECRET["apitest"], algorithms=['HS256'])
+            logger.info("APITEST token is used")
+        except:
+            # Token could not be decoded, token is bad
+            logger.error("Authorization FAILED")
+            raise Exception('Unauthorized')
+
 
     ##### Boilerplate code from AWS ######
     tmp = event['methodArn'].split(':')

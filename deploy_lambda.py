@@ -72,7 +72,7 @@ print(response_restapi)
 #create api gateway
 response_auth = apigateway.create_authorizer(
 	restApiId = response_restapi["id"],
-	name = "exampleApproovAuthorizer",
+	name = "exampleApprooveAuthorizer",
 	type = "TOKEN",
 	identitySource = 'method.request.header.Authorization',
 	authorizerUri='arn:aws:apigateway:%s:lambda:path/2015-03-31/functions/arn:aws:lambda:%s:%s:function:%s/invocations'%(REGION,REGION,AWS_ID,DEFAULT_NAME),

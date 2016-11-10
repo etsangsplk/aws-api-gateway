@@ -23,7 +23,7 @@ Access Key ID: EXAMPLESFODNN7EXAMPLE
 Secret Access Key: EXAMPLEtnFEMI/EXAMPLE/EXAMPLEiCYEXAMPLEKEY
 ```
 
-### Setup access keys trought cli interface
+### Setup access keys in cli interface
 
 Run:
 
@@ -31,7 +31,7 @@ Run:
 aws configure
 ```
 
-Setting up keys inside aws shell. Dont settup correct region name and format (json)
+Setting up keys inside aws shell. Don't setup correct region name and format (json)
 
 ```
 AWS Access Key ID [****************AAAA]: 
@@ -44,7 +44,7 @@ Ok now we are ready to mess around AWS.
 
 ### Check lambdas
 
-Check lambdas that are allready there
+Check lambdas that are already there
 
 ```
 aws lambda list-functions | grep FunctionName
@@ -53,7 +53,7 @@ aws lambda list-functions | grep FunctionName
 ### Create new lambda
 
 If you need create lambda lets create one with Approov default lambda.
-Choose your lambda name, get rolle permission ARN string, and choose lambda.zip
+Choose your lambda name, get role permission ARN string, and choose lambda.zip
 from example repository
 
 ```
@@ -66,6 +66,7 @@ ARN role could look like
 ```
 arn:aws:iam::[AWSID]:role/[ROLE_NAME] 
 ```
+
 If everything when ok then you will get as output this kind of json
 
 Output:
@@ -91,11 +92,11 @@ aws lambda create-function --function-name awsomeApprooveGateway --runtime pytho
 
 List API's
 
-``
-aws apigateway get-rest-apis | grep name`
+```
+aws apigateway get-rest-apis | grep name
 ```
 
-Check if one excists
+Check if one exists
 
 ## Adding access permissions for Lambda
 
