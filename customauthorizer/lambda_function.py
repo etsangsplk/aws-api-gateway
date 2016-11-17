@@ -77,45 +77,43 @@ def lambda_handler(event, context):
     policy.stage = apiGatewayArnTmp[1]
     #####################################
 
+    conditions = {}
     # Retrieve the time from the token
     if 'exp' in tokenContents:
         expiration = (tokenContents['exp'])
+         # Convert to the appropriate format for the condition in the policy
+        expirationTime = datetime.datetime.utcfromtimestamp(expiration).strftime('%Y-%m-%dT%H:%M:%SZ')
+
+        # Set up a condition based on expiration time stored in the JWT
+        conditions["DateLessThanEquals"] = {
+            "aws:CurrentTime": expirationTime
+        }
     else:
         logger.error("Authorization FAILED")
         raise Exception('Unauthorized')
 
-    # Convert to the appropriate format for the condition in the policy
-    expirationTime = datetime.datetime.utcfromtimestamp(expiration).strftime('%Y-%m-%dT%H:%M:%SZ')
-
+   
     # Get IP Hash from token contents
     if 'ip' in tokenContents:
         base64IP = (tokenContents['ip'])
-    else:
-        logger.error("Authorization FAILED")
-        raise Exception('Unauthorized')
+        # Base64 encoded ip address, so decode it here
+        try:
+            decodedIP = base64.b64decode(base64IP)
+        except TypeError:
+            # Not a Base64 encoded value
+            logger.error("Authorization FAILED")
+            raise Exception('Unauthorized')
 
-    # Base64 encoded ip address, so decode it here
-    try:
-        decodedIP = base64.b64decode(base64IP)
-    except TypeError:
-        # Not a Base64 encoded value
-        logger.error("Authorization FAILED")
-        raise Exception('Unauthorized')
-    issuedIP = socket.inet_ntop(socket.AF_INET6, bytes(decodedIP))
-    # If it is ipv4, convert from ipv6 format
-    mappedIP = ipaddress.IPv6Address(issuedIP.decode("utf-8"))
-    if mappedIP.ipv4_mapped is not None:
-        issuedIP = mappedIP.ipv4_mapped
+        issuedIP = socket.inet_ntop(socket.AF_INET6, bytes(decodedIP))
+        # If it is ipv4, convert from ipv6 format
+        mappedIP = ipaddress.IPv6Address(issuedIP.decode("utf-8"))
+        if mappedIP.ipv4_mapped is not None:
+            issuedIP = mappedIP.ipv4_mapped
 
-    # Set up a condition based on the ip address and expiration time stored in the JWT
-    conditions = {
-        "IpAddress": {
+        # Set up a condition based on the ip address
+        conditions["IpAddress"] = {
             "aws:SourceIp": str(issuedIP)
-        },
-        "DateLessThanEquals": {
-            "aws:CurrentTime": expirationTime
         }
-    }
 
     # Allow all methods, restricted to those which match condition
     policy.allowMethodWithConditions(HttpVerb.ALL, '*', conditions)
