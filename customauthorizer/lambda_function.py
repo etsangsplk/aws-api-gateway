@@ -77,8 +77,9 @@ def lambda_handler(event, context):
     policy.stage = apiGatewayArnTmp[1]
     #####################################
 
+    # conditions for allowed methods
     conditions = {}
-    # Retrieve the time from the token
+    # Retrieve the time from the token this is mandatory field
     if 'exp' in tokenContents:
         expiration = (tokenContents['exp'])
          # Convert to the appropriate format for the condition in the policy
@@ -93,7 +94,7 @@ def lambda_handler(event, context):
         raise Exception('Unauthorized')
 
    
-    # Get IP Hash from token contents
+    # Get IP Hash from token contents - ip field is optional
     if 'ip' in tokenContents:
         base64IP = (tokenContents['ip'])
         # Base64 encoded ip address, so decode it here
